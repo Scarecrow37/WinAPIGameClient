@@ -1,22 +1,19 @@
-﻿#include <WinSock2.h>
+﻿#define WIN32_LEAN_AND_MEAN
+#include <WinSock2.h>
+#include <Windows.h>
+
 #include "WindowsApplication.h"
 
-#include <iostream>
-#include <WS2tcpip.h>
-
 #include "GameManager.h"
-#include "Packet.h"
 #include "Engine/World/World.h"
 #include "Game/Functions/Initialize.h"
 #include "InputSystems/Controller/Controller.h"
 #include "InputSystems/Keyboad/Keyboard.h"
 #include "InputSystems/Mouse/Mouse.h"
+#include "Network/Network.h"
 #include "RenderSystems/Renderer/WindowsGraphicDeviceInterface.h"
 #include "TimeSystems/QueryClock/QueryClock.h"
 
-#pragma comment(lib,"ws2_32")
-
-bool isConnected = true;
 
 int APIENTRY wWinMain(_In_ const HINSTANCE hInstance,
                       _In_opt_ const HINSTANCE hPrevInstance,
@@ -27,7 +24,7 @@ int APIENTRY wWinMain(_In_ const HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     WindowsApplication::Initialize(hInstance);
-    if (!isConnected) return EXIT_FAILURE;
+    if (!Network::isConnected) return EXIT_FAILURE;
     WindowsApplication::Run();
     WindowsApplication::Finalize();
 
@@ -76,40 +73,9 @@ void WindowsApplication::Initialize(const HINSTANCE instanceHandle)
 
 
     // Network Prepare
-    WSAData wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
-    SOCKET serverSocket = {};
-    Connection connection = {};
-    try
-    {
-        serverSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-        if (serverSocket == INVALID_SOCKET) throw std::exception("Server socket is invalid.");
-        SOCKADDR_IN serverAddress = {};
-        serverAddress.sin_family = AF_INET;
-        int result = inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr);
-        if (result < 0) throw std::exception("IP address convert fail.");
-        serverAddress.sin_port = htons(18080);
-        result = connect(serverSocket, reinterpret_cast<SOCKADDR*>(&serverAddress), sizeof(serverAddress));
-        if (result < 0) throw std::exception("Connect fail");
+    Network::Initialize();
 
-        // Connect Sequence
-        Header header = {};
-        int receiveByte = recv(serverSocket, reinterpret_cast<char*>(&header), sizeof(header), MSG_WAITALL);
-        if (receiveByte < 0 || header.type != Connect) throw std::exception("Connection header receive fail.");
-        receiveByte = recv(serverSocket, reinterpret_cast<char*>(&connection), header.length, MSG_WAITALL);
-        if (receiveByte < 0) throw std::exception("Connection data receive fail.");
-        if (!connection.canConnect) throw std::exception("Server is full.");
-    }
-    catch (const std::exception& exception)
-    {
-        isConnected = false;
-        const int length = static_cast<int>(strlen(exception.what())) + 1;
-        wchar_t* buffer = new wchar_t[length];
-        MultiByteToWideChar(CP_ACP, 0, exception.what(), length, buffer, length);
-        MessageBox(nullptr, buffer, L"연결 실패", MB_OK);
-    }
-
-    if (isConnected)
+    if (Network::isConnected)
     {
         // GameManager Prepare
         GameManager::SetKeyboardSystem(new Keyboard);
@@ -117,12 +83,10 @@ void WindowsApplication::Initialize(const HINSTANCE instanceHandle)
         GameManager::SetControllerSystem(new Controller);
         GameManager::SetTimeSystem(new QueryClock);
         GameManager::SetRenderer(new WindowsGraphicDeviceInterface);
-        World* world = Game::LoadWorld(connection);
+        World* world = Game::LoadWorld(Network::connection);
         GameManager::SetWorld(world);
         GameManager::Initialize();
     }
-    closesocket(serverSocket);
-    WSACleanup();
 }
 
 void WindowsApplication::Run()

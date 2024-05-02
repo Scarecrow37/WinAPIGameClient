@@ -93,7 +93,8 @@
     <ClInclude Include="Models\Region\Region.h" />
     <ClInclude Include="Models\Transform\Transform.h" />
     <ClInclude Include="Models\Vector\Vector.h" />
-    <ClInclude Include="Packet.h" />
+    <ClInclude Include="Network\Network.h" />
+    <ClInclude Include="Network\Packet.h" />
     <ClInclude Include="RenderSystems\IDraw.h" />
     <ClInclude Include="RenderSystems\Renderer\IRenderer.h" />
     <ClInclude Include="RenderSystems\Renderer\WindowsGraphicDeviceInterface.h" />
@@ -516,6 +517,7 @@
     </ClCompile>
     <ClCompile Include="Models\Region\Region.cpp" />
     <ClCompile Include="Models\Vector\Vector.cpp" />
+    <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="RenderSystems\Renderer\WindowsGraphicDeviceInterface.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>

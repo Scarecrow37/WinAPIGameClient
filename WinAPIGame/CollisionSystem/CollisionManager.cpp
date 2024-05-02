@@ -9,6 +9,7 @@ void CollisionManager::CollisionUpdate(const Dosuha::Vector<ICollision*>& collis
     {
         for (const auto& collisionB : collisions)
         {
+            if (!collisionA || !collisionB) continue;
             if (collisionA == collisionB) continue;
             // 임시 구문
             if (dynamic_cast<Floor*>(collisionA) || dynamic_cast<Floor*>(collisionB))

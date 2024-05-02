@@ -17,6 +17,7 @@ public:
 
     const Dosuha::Vector<ICollision*>& GetCollisions() const override;
     void AddObject(Object* object) override;
+    void RemoveObject(Object* object) override;
 
 private:
     Dosuha::Vector<Object*> _objects;

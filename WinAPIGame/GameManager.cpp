@@ -1,8 +1,10 @@
-﻿#include "GameManager.h"
+﻿#define WIN32_LEAN_AND_MEAN
+#include <WinSock2.h>
+#include <Windows.h>
+#include "GameManager.h"
 
 #include <cassert>
 #include <iostream>
-#include <Windows.h>
 
 #include "Engine/World/World.h"
 #include "TimeSystems/ITimeSystem.h"
@@ -12,6 +14,7 @@
 #include "RenderSystems/RenderManager.h"
 #include "RenderSystems/Renderer/IRenderer.h"
 #include "CollisionSystem/CollisionManager.h"
+#include "Network/Network.h"
 
 GameManager* GameManager::_instance = nullptr;
 
@@ -155,10 +158,12 @@ void GameManager::Finalize()
 void GameManager::Update() const
 {
     _timeSystem->Update();
+    Network::Receive();
     for (const auto& inputSystem : _inputSystems) inputSystem->Update();
     for (const auto& action : _actions) action->Update();
     _world->Update(_timeSystem->GetDeltaTime());
     for (const auto& inputSystem : _inputSystems) inputSystem->Reset();
+    Network::Send();
 }
 
 void GameManager::FixedUpdate() const

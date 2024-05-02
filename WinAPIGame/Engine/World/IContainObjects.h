@@ -16,4 +16,5 @@ public:
 
     virtual const Dosuha::Vector<ICollision*>& GetCollisions() const = 0;
     virtual void AddObject(Object* object) = 0;
+    virtual void RemoveObject(Object* object) = 0;
 };

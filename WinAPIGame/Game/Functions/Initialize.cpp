@@ -1,7 +1,7 @@
 ﻿#include "Initialize.h"
 
 #include "../../GameManager.h"
-#include "../../Packet.h"
+#include "../../Network/Packet.h"
 #include "../../Engine/World/World.h"
 #include "../Objects/Player.h"
 #include "../../Engine/Object/Object.h"
@@ -15,6 +15,7 @@
 
 namespace Game
 {
+    World* world = nullptr;
     Player* player1 = nullptr;
     Player* player2 = nullptr;
 
@@ -61,16 +62,27 @@ namespace Game
 
     World* LoadWorld(const Connection& connection)
     {
-        World* world = new World;
+        world = new World;
         world->AddObject(new Floor);
 
         world->AddObject(CreatePlayer(connection.characterName));
-        if (connection.otherPlayerExist)
-        {
-            player2 = new Player(connection.otherCharacterName);
-            player2->SetPosition({connection.otherPlayerLocation.x, connection.otherPlayerLocation.y});
-            world->AddObject(player2);
-        }
+        if (connection.otherPlayerExist) MakeSecondPlayer(connection.otherCharacterName,
+                                                          connection.otherPlayerLocation.x,
+                                                          connection.otherPlayerLocation.y);
         return world;
+    }
+
+    void MakeSecondPlayer(const wchar_t* name, float x, float y)
+    {
+        player2 = new Player(name);
+        player2->SetPosition({x, y});
+        world->AddObject(player2);
+    }
+
+    void RemoveSecondPlayer()
+    {
+        world->RemoveObject(player2);
+        delete player2;
+        player2 = nullptr;
     }
 }
