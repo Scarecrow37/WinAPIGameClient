@@ -18,36 +18,41 @@ namespace Game
     World* world = nullptr;
     Player* player1 = nullptr;
     Player* player2 = nullptr;
+    bool useController = false;
 
     InputAction* CreateMovementAction()
     {
-        InputAction* action = InputAction::Builder::GetInstance()
-                              .Initialize()
-                              .OpenInvokerSet()
-                              .AddInvoker(GameManager::GetKeyboard()->GetInputValueGetter(VK_LEFT),
-                                          Modifier::InverseStrategy)
-                              .AddInvoker(GameManager::GetKeyboard()->GetInputValueGetter(VK_RIGHT))
-                              .CloseInvokerSet()
-                              .OpenInvokerSet()
-                              .AddInvoker(
-                                  GameManager::GetController()->GetInputValueGetter(Controller::Component::LeftThumbX))
-                              .CloseInvokerSet()
-                              .Build();
+        InputAction::Builder::GetInstance().Initialize().OpenInvokerSet();
+        if (useController)
+        {
+            InputAction::Builder::GetInstance()
+                .AddInvoker(GameManager::GetController()->GetInputValueGetter(Controller::Component::LeftThumbX));
+        }
+        else
+        {
+            InputAction::Builder::GetInstance()
+                .AddInvoker(GameManager::GetKeyboard()->GetInputValueGetter(VK_LEFT), Modifier::InverseStrategy)
+                .AddInvoker(GameManager::GetKeyboard()->GetInputValueGetter(VK_RIGHT));
+        }
+        InputAction* action = InputAction::Builder::GetInstance().CloseInvokerSet().Build();
         GameManager::AddInputAction(action);
         return action;
     }
 
     InputAction* CreateJumpAction()
     {
-        InputAction* jump = InputAction::Builder::GetInstance()
-                            .Initialize()
-                            .OpenInvokerSet()
-                            .AddInvoker(GameManager::GetKeyboard()->GetInputValueGetter(VK_SPACE))
-                            .CloseInvokerSet()
-                            .OpenInvokerSet()
-                            .AddInvoker(GameManager::GetController()->GetInputValueGetter(Controller::Component::A))
-                            .CloseInvokerSet()
-                            .Build();
+        InputAction::Builder::GetInstance().Initialize().OpenInvokerSet();
+        if (useController)
+        {
+            InputAction::Builder::GetInstance()
+                .AddInvoker(GameManager::GetController()->GetInputValueGetter(Controller::Component::B));
+        }
+        else
+        {
+            InputAction::Builder::GetInstance()
+                .AddInvoker(GameManager::GetKeyboard()->GetInputValueGetter(VK_SPACE));
+        }
+        InputAction* jump = InputAction::Builder::GetInstance().CloseInvokerSet().Build();
         GameManager::AddInputAction(jump);
         return jump;
     }
@@ -66,9 +71,10 @@ namespace Game
         world->AddObject(new Floor);
 
         world->AddObject(CreatePlayer(connection.characterName));
-        if (connection.otherPlayerExist) MakeSecondPlayer(connection.otherCharacterName,
-                                                          connection.otherPlayerLocation.x,
-                                                          connection.otherPlayerLocation.y);
+        if (connection.otherPlayerExist)
+            MakeSecondPlayer(connection.otherCharacterName,
+                             connection.otherPlayerLocation.x,
+                             connection.otherPlayerLocation.y);
         return world;
     }
 
@@ -84,5 +90,10 @@ namespace Game
         world->RemoveObject(player2);
         delete player2;
         player2 = nullptr;
+    }
+
+    void UseController()
+    {
+        useController = true;
     }
 }

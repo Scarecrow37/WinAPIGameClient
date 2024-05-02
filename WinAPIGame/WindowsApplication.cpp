@@ -23,6 +23,8 @@ int APIENTRY wWinMain(_In_ const HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    if (wcscmp(lpCmdLine, L"-c") == 0) Game::UseController(); 
+
     WindowsApplication::Initialize(hInstance);
     if (!Network::isConnected) return EXIT_FAILURE;
     WindowsApplication::Run();

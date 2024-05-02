@@ -23,6 +23,18 @@ size_t Animation::GetFrameCount() const
     return _frames.Size();
 }
 
+size_t Animation::GetNextPivot(size_t pivot) const
+{
+    const size_t frameSize = _frames.Size();
+    pivot++;
+    while (pivot >= frameSize) 
+    {
+        if (_loop) pivot -= frameSize; 
+        else pivot = frameSize - 1;
+    }
+    return pivot;
+}
+
 Animation::Animation(): _loop(true)
 {
 }

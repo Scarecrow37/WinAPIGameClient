@@ -31,6 +31,7 @@ public:
     void SetPosition(const Vector& vector);
 
     void Update(float deltaTime) override;
+    void FixedUpdate() override;
 
 private:
     void OnMoveAction(const ActionValue& value);
@@ -56,4 +57,6 @@ private:
     Vector _velocity;
     Vector _yVelocity;
     bool _isJumping;
+
+    Vector _virtualVelocity;
 };

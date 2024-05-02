@@ -31,3 +31,13 @@ float Vector::SquareMagnitude() const
 {
     return x * x + y * y;
 }
+
+Vector Vector::operator-(const Vector& rhs) const
+{
+    return {x - rhs.x, y - rhs.y};
+}
+
+Vector Vector::operator/(float scalar) const
+{
+    return {x / scalar, y / scalar};
+}

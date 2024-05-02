@@ -66,40 +66,45 @@ namespace Network
 
     void Receive()
     {
-        SetSocketToNonBlocking();
-        Header header = {};
-        int receiveByte = recv(serverSocket, reinterpret_cast<char*>(&header), sizeof(header), 0);
-        if (receiveByte == 0) throw std::exception("Disconnect");
-        if (receiveByte > 0)
+        while (true)
         {
-            SetSocketToBlocking();
-            switch (header.type)
+            SetSocketToNonBlocking();
+            Header header = {};
+            int receiveByte = recv(serverSocket, reinterpret_cast<char*>(&header), sizeof(header), 0);
+            if (receiveByte < 0 && GetLastError() == WSAEWOULDBLOCK) break;
+            if (receiveByte == 0) throw std::exception("Disconnect");
+            if (receiveByte > 0)
             {
-            case OtherConnect:
+                SetSocketToBlocking();
+                switch (header.type)
                 {
-                    OtherConnection otherConnection = {};
-                    receiveByte = recv(serverSocket, reinterpret_cast<char*>(&otherConnection), header.length,
-                                       MSG_WAITALL);
-                    if (receiveByte <= 0) throw std::exception("Receive other connection data fail.");
-                    Game::MakeSecondPlayer(otherConnection.characterName, otherConnection.playerLocation.x,
-                                           otherConnection.playerLocation.y);
+                case OtherConnect:
+                    {
+                        OtherConnection otherConnection = {};
+                        receiveByte = recv(serverSocket, reinterpret_cast<char*>(&otherConnection), header.length,
+                                           MSG_WAITALL);
+                        if (receiveByte <= 0) throw std::exception("Receive other connection data fail.");
+                        Game::MakeSecondPlayer(otherConnection.characterName, otherConnection.playerLocation.x,
+                                               otherConnection.playerLocation.y);
+                    }
+                    break;
+                case Disconnect:
+                    {
+                        Game::RemoveSecondPlayer();
+                    }
+                    break;
+                case OtherLocation:
+                    {
+                        Location location = {};
+                        receiveByte = recv(serverSocket, reinterpret_cast<char*>(&location), header.length,
+                                           MSG_WAITALL);
+                        if (receiveByte <= 0) throw std::exception("Receive other location data fail.");
+                        Game::player2->SetPosition({location.x, location.y});
+                    }
+                    break;
+                default:
+                    throw std::exception("Receive unknown packet.");
                 }
-                break;
-            case Disconnect:
-                {
-                    Game::RemoveSecondPlayer();
-                }
-                break;
-            case OtherLocation:
-                {
-                    Location location = {};
-                    receiveByte = recv(serverSocket, reinterpret_cast<char*>(&location), header.length, MSG_WAITALL);
-                    if (receiveByte <= 0) throw std::exception("Receive other location data fail.");
-                    Game::player2->SetPosition({location.x, location.y});
-                }
-                break;
-            default:
-                throw std::exception("Receive unknown packet.");
             }
         }
     }

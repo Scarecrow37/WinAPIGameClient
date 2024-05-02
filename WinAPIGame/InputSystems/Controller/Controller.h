@@ -25,6 +25,8 @@ public:
         RightThumb,
         LeftShoulder,
         RightShoulder,
+        Padding1,
+        Padding2,
         A,
         B,
         X,

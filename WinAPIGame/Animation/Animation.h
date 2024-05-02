@@ -12,6 +12,7 @@ public:
     void AddFrame(const Frame& frame);
     const Frame& GetFrame(size_t index) const;
     size_t GetFrameCount() const;
+    size_t GetNextPivot(size_t pivot) const;
 
 private:
     Animation();

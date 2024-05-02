@@ -15,6 +15,7 @@
 #include "../../Math/Math.h"
 #include "../../StateMachine/State.h"
 #include "../../StateMachine/StateMachine.h"
+#include "../../TimeSystems/IDeltaTime.h"
 
 void CopyAndAppend(wchar_t*& buffer, const wchar_t* name, const wchar_t* tail)
 {
@@ -25,9 +26,9 @@ void CopyAndAppend(wchar_t*& buffer, const wchar_t* name, const wchar_t* tail)
 }
 
 
-Player::Player(const wchar_t* name) : _speed(300.0f), _jumpScale(1000.f), _velocity(Vector::Zero),
+Player::Player(const wchar_t* name) : _speed(300.0f), _jumpScale(400.f), _velocity(Vector::Zero),
                                       _yVelocity(Vector::Zero),
-                                      _isJumping(false)
+                                      _isJumping(false), _virtualVelocity(Vector::Zero)
 {
     CopyAndAppend(_idleFile, name, L"_idle.bmp");
     CopyAndAppend(_walkFile, name, L"_walk.bmp");
@@ -67,7 +68,7 @@ Player::Player(const wchar_t* name) : _speed(300.0f), _jumpScale(1000.f), _veloc
                                      0.15f, _runFile, {0, 0, 48, 48}, 0xFF00FF, nullptr, nullptr
                                  }).AddFrame().AddFrame().AddFrame().AddFrame().AddFrame().Build());
     animationGroup->AddAnimation(jump, Animation::Builder::GetInstance().Initialize().AddFrame({
-                                     0.1f, _jumpFile, {0, 0, 48, 48}, 0xFF00FF, nullptr, nullptr
+                                     0.15f, _jumpFile, {0, 0, 48, 48}, 0xFF00FF, nullptr, nullptr
                                  }).AddFrame().AddFrame().AddFrame().AddFrame().AddFrame().NotLoop().Build());
 
 
@@ -145,26 +146,34 @@ void Player::OnCollisionEnd(ICollision* other)
 
 void Player::SetPosition(const Vector& vector)
 {
+    _virtualVelocity += ((vector - _transform.location) / GameManager::GetTime()->GetDeltaTime());
+    if (!_isJumping && _virtualVelocity.y > 0) _isJumping = true;
     _transform.location = vector;
 }
 
 void Player::Update(float deltaTime)
 {
     Object::Update(deltaTime);
-    if (_velocity.x < 0) _animationComponent->Flip(true, false);
-    else if (_velocity.x > 0) _animationComponent->Flip(false, false);
+    if (_velocity.x < 0 || _virtualVelocity.x < 0) _animationComponent->Flip(true, false);
+    else if (_velocity.x > 0 || _virtualVelocity.x > 0) _animationComponent->Flip(false, false);
     _transform.location += (_velocity + _yVelocity) * deltaTime;
     _velocity = Vector::Zero;
 }
 
+void Player::FixedUpdate()
+{
+    Object::FixedUpdate();
+    _virtualVelocity = Vector::Zero;
+}
+
 bool Player::IsMove() const
 {
-    return Math::Absolute(_velocity.x) > 0;
+    return Math::Absolute(_velocity.x) > 0 || Math::Absolute(_virtualVelocity.x) > 0;
 }
 
 bool Player::IsRun() const
 {
-    return Math::Absolute(_velocity.x) > _speed * 0.5f;
+    return Math::Absolute(_velocity.x) > _speed * 0.5f || Math::Absolute(_virtualVelocity.x) > _speed * 0.5f;
 }
 
 bool Player::IsJump() const

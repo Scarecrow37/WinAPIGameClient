@@ -1,6 +1,7 @@
 ﻿#include "ButtonInputComponent.h"
 
-ButtonInputComponent::ButtonInputComponent(): _on(false), _started(false), _ended(false)
+ButtonInputComponent::ButtonInputComponent(): _previous(false), _current(false), _on(false), _started(false),
+                                              _ended(false)
 {
 }
 
@@ -25,6 +26,8 @@ void ButtonInputComponent::Initialize()
     _on = false;
     _started = false;
     _ended = false;
+    _previous = false;
+    _current = false;
 }
 
 void ButtonInputComponent::Start()
@@ -35,12 +38,16 @@ void ButtonInputComponent::Start()
 
 void ButtonInputComponent::SetValue(const bool value)
 {
-    static bool previous = false;
-    static bool current = false;
-    current = value;
-    if (!previous && current) Start();
-    else if (previous && !current) End();
-    previous = current;
+    _current = value;
+    if (!_previous && _current)
+    {
+        Start();
+    }
+    else if (_previous && !_current)
+    {
+        End();
+    }
+    _previous = _current;
 }
 
 void ButtonInputComponent::End()

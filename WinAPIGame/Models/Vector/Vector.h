@@ -15,4 +15,6 @@ struct Vector
     bool operator==(const Vector& rhs) const;
 
     float SquareMagnitude() const;
+    Vector operator-(const Vector& rhs) const;
+    Vector operator/(float scalar) const;
 };

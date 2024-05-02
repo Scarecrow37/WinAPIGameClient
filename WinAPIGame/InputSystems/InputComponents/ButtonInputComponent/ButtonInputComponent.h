@@ -22,6 +22,9 @@ public:
     float GetInputValue() const override;
 
 private:
+    bool _previous;
+    bool _current;
+    
     bool _on;
     bool _started;
     bool _ended;

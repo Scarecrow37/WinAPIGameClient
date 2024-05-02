@@ -16,12 +16,12 @@ void AnimationSprite::Update(float deltaTime)
     static float elapsedTime;
     _animationGroup->Update();
     elapsedTime += deltaTime;
-    Animation* animation = _animationGroup->GetAnimation();
+    const Animation* animation = _animationGroup->GetAnimation();
     while (elapsedTime > animation->GetFrame(_pivot).interval)
     {
         if (animation->GetFrame(_pivot).onEnd) animation->GetFrame(_pivot).onEnd();
         elapsedTime -= animation->GetFrame(_pivot).interval;
-        _pivot = ++_pivot % animation->GetFrameCount();
+        _pivot = animation->GetNextPivot(_pivot);
         if (animation->GetFrame(_pivot).onStart) animation->GetFrame(_pivot).onStart();
     }
 }

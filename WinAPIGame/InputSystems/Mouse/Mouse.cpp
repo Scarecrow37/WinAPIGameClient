@@ -16,7 +16,7 @@ void Mouse::Initialize()
 
 void Mouse::Update()
 {
-    POINT mousePosition;
+    /*POINT mousePosition;
     GetCursorPos(&mousePosition);
     ScreenToClient(WindowsApplication::GetWindowHandle(), &mousePosition);
 
@@ -31,7 +31,7 @@ void Mouse::Update()
 
     _left.SetValue(GetKeyState(VK_LBUTTON) & 0x8000);
     _right.SetValue(GetKeyState(VK_RBUTTON) & 0x8000);
-    _middle.SetValue(GetKeyState(VK_LBUTTON) & 0x8000);
+    _middle.SetValue(GetKeyState(VK_LBUTTON) & 0x8000);*/
 }
 
 void Mouse::Reset()

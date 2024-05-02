@@ -145,8 +145,9 @@ const IInputValue* Controller::GetInputValueGetter(const Component& component) c
         return &_rightThumbX;
     case Component::RightThumbY:
         return &_rightThumbY;
+        default:
+            return nullptr;
     }
-    return nullptr;
 }
 
 unsigned short Controller::GetFlag(const Component& component)
